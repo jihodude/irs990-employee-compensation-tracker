@@ -1,0 +1,18 @@
+# Generated outputs
+outputs/
+
+# Cached IRS index files
+cache/
+
+# Mac metadata
+.DS_Store
+**/.DS_Store
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.env
+
+# Claude
+.claude/

@@ -1,0 +1,148 @@
+Dependencies -- What They Are and How to Install Them
+
+
+WHAT IS A "DEPENDENCY"?
+
+A dependency is a piece of software that this program needs in order to run.
+Think of it like a recipe that calls for specific ingredients -- if you don't have
+the ingredient, the dish won't work. The pipeline has a few required ingredients,
+and this document explains what each one does and how to get it.
+
+
+------------------------------------------------------------------------
+
+WHAT THIS PIPELINE DEPENDS ON
+
+------------------------------------------------------------------------
+
+1. Python  (the engine)
+
+What it is:
+Python is the programming language the entire pipeline is written in.
+Your Mac comes with a very old version of Python that doesn't support
+all the features this program uses.
+
+What version you need: Python 3.9 or newer (3.11 or 3.12 recommended)
+
+How to install:
+  1. Go to https://www.python.org/downloads/
+  2. Click the big yellow "Download Python" button
+  3. Open the downloaded file and follow the installer -- accept all defaults
+  4. When done, open Terminal and run:
+        python3 --version
+     You should see something like "Python 3.12.4"
+
+
+------------------------------------------------------------------------
+
+2. pip  (the package installer)
+
+What it is:
+pip is Python's built-in package manager. It's what you use to install
+Python libraries (see below). It comes automatically with Python -- you
+do not need to install it separately.
+
+How to verify it's there:
+  Open Terminal and type:  pip3 --version
+
+
+------------------------------------------------------------------------
+
+3. Python Libraries  (the tools the pipeline uses)
+
+These are pre-built modules that handle specific tasks so the pipeline
+doesn't have to reinvent the wheel. They are listed in requirements.txt
+and installed all at once with one command.
+
+  Library      What it does in this pipeline
+  ----------   -----------------------------------------------------------
+  requests     Downloads files from the internet (IRS index, XML files)
+  lxml         Reads and navigates XML files (IRS 990 filings are in XML)
+  pandas       Builds and writes the final CSV spreadsheet
+  flask        Runs the local web interface you use in your browser
+  inflate64    Decompresses certain IRS batch files that use an older ZIP
+               compression format (DEFLATE64), introduced in 2025 batches
+
+How to install all five at once:
+Open Terminal, navigate to the project folder, and run:
+  pip3 install -r requirements.txt
+
+The START.command launcher (Mac) and START.bat (Windows) do this
+automatically on first run via SETUP, so you normally don't need to
+run this manually.
+
+
+------------------------------------------------------------------------
+
+4. Node.js  (only needed for Claude Code)
+
+What it is:
+Node.js is a separate programming environment required by Claude Code
+(Anthropic's AI coding assistant). It is NOT needed to run the pipeline
+itself -- only if you want to use Claude Code to manage or update the program.
+
+What version you need: LTS (Long-Term Support) version
+
+How to install:
+  1. Go to https://nodejs.org/
+  2. Download the "LTS" version
+  3. Open the installer and accept all defaults
+  4. Verify: open Terminal and run:
+        node --version
+     You should see something like "v22.0.0"
+
+
+------------------------------------------------------------------------
+
+5. Claude Code  (optional -- only for managing the code)
+
+What it is:
+Claude Code is an AI assistant that runs in your Terminal and helps you
+read, update, and troubleshoot the pipeline code in plain English.
+It is completely optional for day-to-day use.
+
+Requires: Node.js (see above) and an Anthropic account (free at claude.ai)
+
+How to install:
+Open Terminal and run:
+  npm install -g @anthropic-ai/claude-code
+
+Then to start it in the project folder:
+  cd "/path/to/990-pipeline"
+  claude
+
+
+------------------------------------------------------------------------
+
+QUICK INSTALL CHECKLIST
+
+For someone setting up for the first time:
+
+  [ ] Download and install Python from https://www.python.org/downloads/
+  [ ] Mac: double-click SETUP.command (inside the "For Mac" folder)
+      Windows: double-click SETUP.bat
+      (This installs all required libraries automatically)
+  [ ] Mac: double-click START.command to launch
+      Windows: double-click START.bat
+  [ ] Open browser to the URL shown in the Terminal window
+
+That's it. Node.js and Claude Code are optional extras -- skip them if
+you just want to run the pipeline.
+
+
+------------------------------------------------------------------------
+
+IF pip3 install FAILS
+
+"pip3: command not found"
+  Python is not installed or not on your PATH. Go back to Step 1 and
+  reinstall Python from python.org. After installing, close Terminal
+  completely and reopen it.
+
+"Could not find a version that satisfies the requirement"
+  Your Python version may be too old. Run "python3 --version" -- if it
+  says 3.8 or lower, reinstall Python from python.org.
+
+"Permission denied"
+  Try adding --user to the command:
+    pip3 install --user -r requirements.txt

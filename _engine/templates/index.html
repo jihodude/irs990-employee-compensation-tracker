@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>990 Compensation Pipeline</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #f0f2f5;
+      color: #1a1a2e;
+      min-height: 100vh;
+    }
+
+    /* ── Header ── */
+    header {
+      background: #1a1a2e;
+      color: white;
+      padding: 20px 40px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    header h1 { font-size: 1.4rem; font-weight: 600; }
+    header p  { font-size: 0.85rem; color: #aaa; margin-top: 2px; }
+
+    /* ── Layout ── */
+    .page { max-width: 1100px; margin: 0 auto; padding: 32px 24px; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+
+    /* ── Cards ── */
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.08);
+    }
+    .card h2 {
+      font-size: 0.95rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: #666;
+      margin-bottom: 16px;
+    }
+
+    /* ── Form ── */
+    label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: #444;
+      margin-bottom: 4px;
+      margin-top: 14px;
+    }
+    label:first-of-type { margin-top: 0; }
+
+    input[type="number"],
+    select {
+      width: 100%;
+      padding: 9px 12px;
+      border: 1.5px solid #ddd;
+      border-radius: 8px;
+      font-size: 1rem;
+      color: #1a1a2e;
+      background: white;
+      outline: none;
+      transition: border-color .15s;
+      appearance: none;
+      -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23999' d='M6 8L0 0h12z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      padding-right: 32px;
+    }
+    input[type="number"]:focus,
+    select:focus { border-color: #4f46e5; }
+
+    .hint {
+      font-size: 0.78rem;
+      color: #999;
+      margin-top: 4px;
+    }
+
+    /* ── Run button ── */
+    #run-btn {
+      width: 100%;
+      margin-top: 20px;
+      padding: 12px;
+      background: #4f46e5;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .15s, opacity .15s;
+    }
+    #run-btn:hover:not(:disabled) { background: #4338ca; }
+    #run-btn:disabled { opacity: .5; cursor: not-allowed; }
+
+    /* ── Download button ── */
+    #download-btn {
+      display: none;
+      width: 100%;
+      margin-top: 10px;
+      padding: 12px;
+      background: #16a34a;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      text-align: center;
+      transition: background .15s;
+    }
+    #download-btn:hover { background: #15803d; }
+
+    /* ── Status badge ── */
+    #status-badge {
+      display: none;
+      margin-top: 14px;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      text-align: center;
+    }
+    #status-badge.running  { background: #eff6ff; color: #1d4ed8; }
+    #status-badge.success  { background: #f0fdf4; color: #15803d; }
+    #status-badge.error    { background: #fef2f2; color: #dc2626; }
+
+    /* ── Org editor ── */
+    .org-table-wrap {
+      max-height: 260px;
+      overflow-y: auto;
+      border: 1.5px solid #eee;
+      border-radius: 8px;
+    }
+    .org-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+    }
+    .org-table th {
+      background: #f8f8fc;
+      padding: 7px 10px;
+      text-align: left;
+      font-weight: 600;
+      color: #666;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      position: sticky;
+      top: 0;
+      border-bottom: 1.5px solid #eee;
+    }
+    .org-table td {
+      padding: 5px 6px;
+      border-bottom: 1px solid #f4f4f4;
+      vertical-align: middle;
+    }
+    .org-table tr:last-child td { border-bottom: none; }
+    .org-table input {
+      width: 100%;
+      padding: 4px 7px;
+      border: 1.5px solid #ddd;
+      border-radius: 5px;
+      font-size: 0.82rem;
+      color: #1a1a2e;
+      background: white;
+      outline: none;
+      appearance: auto;
+      -webkit-appearance: auto;
+      background-image: none;
+      padding-right: 7px;
+    }
+    .org-table input:focus { border-color: #4f46e5; }
+    .org-table input[readonly] {
+      border-color: transparent;
+      background: transparent;
+      cursor: default;
+    }
+    .btn-remove {
+      background: none;
+      border: none;
+      color: #ccc;
+      cursor: pointer;
+      font-size: 1.1rem;
+      line-height: 1;
+      padding: 2px 4px;
+      border-radius: 4px;
+      display: none;
+    }
+    .btn-remove:hover { color: #dc2626; background: #fef2f2; }
+    .editing .btn-remove { display: inline-block; }
+    .org-count-label {
+      font-size: 0.78rem;
+      color: #999;
+      margin-top: 6px;
+    }
+    .org-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .btn-edit-orgs {
+      flex: 1;
+      padding: 8px 12px;
+      background: #f0f0f8;
+      color: #4f46e5;
+      border: 1.5px solid #ddd;
+      border-radius: 7px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .15s;
+    }
+    .btn-edit-orgs:hover { background: #e5e4f8; }
+    .btn-save-orgs {
+      flex: 1;
+      padding: 8px 12px;
+      background: #4f46e5;
+      color: white;
+      border: none;
+      border-radius: 7px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: none;
+      transition: background .15s;
+    }
+    .btn-save-orgs:hover { background: #4338ca; }
+    .btn-add-org {
+      width: 100%;
+      margin-top: 6px;
+      padding: 7px;
+      background: none;
+      border: 1.5px dashed #ccc;
+      border-radius: 7px;
+      font-size: 0.82rem;
+      color: #999;
+      cursor: pointer;
+      display: none;
+      transition: border-color .15s, color .15s;
+    }
+    .btn-add-org:hover { border-color: #4f46e5; color: #4f46e5; }
+    .editing .btn-add-org { display: block; }
+    #org-save-badge {
+      display: none;
+      margin-top: 8px;
+      padding: 6px 10px;
+      border-radius: 7px;
+      font-size: 0.82rem;
+      font-weight: 500;
+      text-align: center;
+    }
+    #org-save-badge.success { background: #f0fdf4; color: #15803d; }
+    #org-save-badge.error   { background: #fef2f2; color: #dc2626; }
+
+    /* ── Log console ── */
+    #log-box {
+      background: #0f0f23;
+      color: #a0f0a0;
+      font-family: "SF Mono", "Fira Code", "Cascadia Code", monospace;
+      font-size: 0.78rem;
+      line-height: 1.6;
+      border-radius: 8px;
+      padding: 16px;
+      min-height: 380px;
+      max-height: 520px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+    #log-box .placeholder {
+      color: #555;
+      font-style: italic;
+    }
+    #log-box .error-line { color: #f87171; }
+    #log-box .warn-line  { color: #fbbf24; }
+    #log-box .ok-line    { color: #86efac; }
+
+    /* ── Spinner ── */
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spinner {
+      display: inline-block;
+      width: 14px; height: 14px;
+      border: 2px solid #fff4;
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+      vertical-align: middle;
+      margin-right: 6px;
+    }
+
+    /* ── How it works section ── */
+    .steps {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 4px;
+    }
+    .step {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+    .step-num {
+      background: #ede9fe;
+      color: #4f46e5;
+      font-weight: 700;
+      font-size: 0.8rem;
+      border-radius: 50%;
+      width: 24px; height: 24px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .step-text { font-size: 0.85rem; color: #555; line-height: 1.4; }
+    .step-text strong { color: #1a1a2e; }
+
+    /* ── Responsive ── */
+    @media (max-width: 720px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>990 Compensation Pipeline</h1>
+    <p>Extract executive compensation from IRS Form 990 filings</p>
+  </div>
+</header>
+
+<div class="page">
+  <div class="grid">
+
+    <!-- ── Left column: controls ── -->
+    <div style="display: flex; flex-direction: column; gap: 20px;">
+
+      <!-- Run settings -->
+      <div class="card">
+        <h2>Run Settings</h2>
+
+        <label for="year">IRS Index Year</label>
+        <select id="year" name="year">
+          <option value="most_recent" selected>Most Recent (auto) — recommended</option>
+          <option value="2025">2025 only</option>
+          <option value="2024">2024 only</option>
+          <option value="2023">2023 only</option>
+          <option value="2022">2022 only</option>
+          <option value="2021">2021 only</option>
+        </select>
+        <p class="hint">
+          <strong>Most Recent (auto)</strong> searches the newest IRS index first, then falls back
+          up to 3 years for any org not yet found. This gives the most current data available across all orgs.
+          Use a specific year to pull from one index only.
+        </p>
+
+        <label for="min_comp">Minimum Compensation ($)</label>
+        <input type="number" id="min_comp" name="min_comp" value="{{ default_min_comp }}"
+               min="0" step="1000" />
+        <p class="hint">Only include people earning at least this amount. Set to 0 for everyone.</p>
+
+        <label for="inflation_rate">Inflation Rate (%)</label>
+        <input type="number" id="inflation_rate" name="inflation_rate" value="3"
+               min="0" max="20" step="0.1" />
+        <p class="hint">Used to calculate inflation-adjusted columns. Default is 3%.</p>
+
+        <button id="run-btn" onclick="startPipeline()">Run Pipeline</button>
+
+        <a id="download-btn" href="/download">⬇ Download CSV</a>
+
+        <div id="status-badge"></div>
+      </div>
+
+      <!-- How it works -->
+      <div class="card">
+        <h2>How It Works</h2>
+        <div class="steps">
+          <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-text"><strong>Downloads the IRS filing index</strong> (~80 MB per year). In <em>Most Recent</em> mode it searches the newest index first, then falls back to earlier years for any org not yet found. Filings indexed in a given year typically cover fiscal year 1–2 years earlier.</div>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-text"><strong>Looks up each org</strong> by EIN to find which IRS batch file contains their 990.</div>
+          </div>
+          <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-text"><strong>Downloads only the specific XML</strong> from that batch — no full ZIP download.</div>
+          </div>
+          <div class="step">
+            <div class="step-num">4</div>
+            <div class="step-text"><strong>Extracts Part VII compensation</strong> — names, titles, and dollar amounts.</div>
+          </div>
+          <div class="step">
+            <div class="step-num">5</div>
+            <div class="step-text"><strong>Writes a clean CSV</strong> ready to open in Excel.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Org editor -->
+      <div class="card" id="org-card">
+        <h2>Organizations</h2>
+
+        <div class="org-table-wrap">
+          <table class="org-table" id="org-table">
+            <thead>
+              <tr>
+                <th style="width:55%">Name</th>
+                <th style="width:34%">EIN</th>
+                <th style="width:11%"></th>
+              </tr>
+            </thead>
+            <tbody id="org-tbody">
+              {% for org in orgs %}
+              <tr>
+                <td><input type="text" value="{{ org.name }}" readonly /></td>
+                <td><input type="text" value="{{ org.ein }}" readonly /></td>
+                <td><button class="btn-remove" onclick="removeOrgRow(this)" title="Remove">✕</button></td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <button class="btn-add-org" onclick="addOrgRow()">+ Add organization</button>
+
+        <p class="org-count-label" id="org-count-label">{{ orgs|length }} organizations</p>
+
+        <div class="org-actions">
+          <button class="btn-edit-orgs" id="edit-orgs-btn" onclick="toggleOrgEdit()">✎ Edit</button>
+          <button class="btn-save-orgs" id="save-orgs-btn" onclick="saveOrgs()">Save Changes</button>
+        </div>
+
+        <div id="org-save-badge"></div>
+      </div>
+
+    </div>
+
+    <!-- ── Right column: log output ── -->
+    <div class="card" style="padding: 20px;">
+      <h2 style="margin-bottom: 12px;">Live Output</h2>
+      <div id="log-box">
+        <span class="placeholder">Output will appear here when you click Run Pipeline...</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  let eventSource = null;
+
+  function startPipeline() {
+    const year          = document.getElementById("year").value;
+    const minComp       = document.getElementById("min_comp").value;
+    const inflationRate = document.getElementById("inflation_rate").value;
+    const runBtn  = document.getElementById("run-btn");
+    const badge   = document.getElementById("status-badge");
+    const dlBtn   = document.getElementById("download-btn");
+    const logBox  = document.getElementById("log-box");
+
+    // Clear log, reset UI
+    logBox.innerHTML = "";
+    dlBtn.style.display = "none";
+    badge.className = "running";
+    badge.style.display = "block";
+    badge.innerHTML = '<span class="spinner"></span> Pipeline running — this takes 3–5 minutes…';
+    runBtn.disabled = true;
+    runBtn.innerHTML = '<span class="spinner"></span> Running…';
+
+    // Close any existing stream
+    if (eventSource) { eventSource.close(); eventSource = null; }
+
+    // POST to start the pipeline
+    fetch("/run", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: `year=${year}&min_comp=${minComp}&inflation_rate=${inflationRate}`,
+    }).then(res => {
+      if (!res.ok) {
+        appendLog("[ERROR] Could not start pipeline.", "error-line");
+        resetRunButton();
+        return;
+      }
+      // Open SSE stream to receive log lines
+      eventSource = new EventSource("/stream");
+
+      eventSource.onmessage = (event) => {
+        const line = JSON.parse(event.data);
+        appendLog(line);
+      };
+
+      eventSource.addEventListener("done", (event) => {
+        const payload = JSON.parse(event.data);
+        eventSource.close();
+        eventSource = null;
+
+        if (payload.result === "success") {
+          badge.className = "success";
+          badge.innerHTML = `✓ Done — ${payload.row_count.toLocaleString()} rows from ${payload.org_count} orgs`;
+          dlBtn.style.display = "block";
+        } else {
+          badge.className = "error";
+          badge.innerHTML = "✗ Pipeline encountered an error — see output above";
+        }
+        resetRunButton();
+      });
+
+      eventSource.onerror = () => {
+        appendLog("[ERROR] Lost connection to pipeline stream.", "error-line");
+        if (eventSource) { eventSource.close(); eventSource = null; }
+        resetRunButton();
+        badge.className = "error";
+        badge.innerHTML = "Connection lost — check the console output";
+      };
+    });
+  }
+
+  function appendLog(text, cssClass) {
+    const logBox = document.getElementById("log-box");
+    const line = document.createElement("div");
+    if (!cssClass) {
+      // Auto-color warnings and errors
+      if (text.includes("[ERROR]"))   cssClass = "error-line";
+      else if (text.includes("[WARNING]")) cssClass = "warn-line";
+      else if (text.includes("Done.") || text.includes("Output written")) cssClass = "ok-line";
+    }
+    if (cssClass) line.className = cssClass;
+    line.textContent = text;
+    logBox.appendChild(line);
+    logBox.scrollTop = logBox.scrollHeight;
+  }
+
+  function resetRunButton() {
+    const runBtn = document.getElementById("run-btn");
+    runBtn.disabled = false;
+    runBtn.innerHTML = "Run Pipeline";
+  }
+
+  // ── Org editor ──────────────────────────────────────────────────────────────
+
+  let orgEditMode = false;
+
+  function toggleOrgEdit() {
+    orgEditMode = !orgEditMode;
+    const card    = document.getElementById("org-card");
+    const editBtn = document.getElementById("edit-orgs-btn");
+    const saveBtn = document.getElementById("save-orgs-btn");
+    const addBtn  = document.querySelector(".btn-add-org");
+    const badge   = document.getElementById("org-save-badge");
+
+    if (orgEditMode) {
+      card.classList.add("editing");
+      editBtn.textContent = "✕ Cancel";
+      saveBtn.style.display = "block";
+      badge.style.display = "none";
+      // Unlock all inputs
+      document.querySelectorAll("#org-tbody input").forEach(i => i.removeAttribute("readonly"));
+    } else {
+      card.classList.remove("editing");
+      editBtn.textContent = "✎ Edit";
+      saveBtn.style.display = "none";
+      // Re-lock all inputs
+      document.querySelectorAll("#org-tbody input").forEach(i => i.setAttribute("readonly", true));
+    }
+    updateOrgCount();
+  }
+
+  function addOrgRow() {
+    const tbody = document.getElementById("org-tbody");
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td><input type="text" placeholder="Organization name" /></td>
+      <td><input type="text" placeholder="12-3456789" maxlength="10" /></td>
+      <td><button class="btn-remove" onclick="removeOrgRow(this)" title="Remove">✕</button></td>
+    `;
+    tbody.appendChild(row);
+    row.querySelector("input").focus();
+    updateOrgCount();
+  }
+
+  function removeOrgRow(button) {
+    button.closest("tr").remove();
+    updateOrgCount();
+  }
+
+  function updateOrgCount() {
+    const count = document.getElementById("org-tbody").rows.length;
+    document.getElementById("org-count-label").textContent = count + " organization" + (count !== 1 ? "s" : "");
+  }
+
+  function saveOrgs() {
+    const rows  = document.querySelectorAll("#org-tbody tr");
+    const badge = document.getElementById("org-save-badge");
+    const orgs  = [];
+
+    for (const row of rows) {
+      const inputs = row.querySelectorAll("input");
+      const name = inputs[0].value.trim();
+      const ein  = inputs[1].value.trim().replace(/-/g, "");  // strip dashes if user typed them
+
+      if (!name && !ein) continue;  // skip completely empty rows
+
+      if (!name) {
+        showOrgBadge("error", "One row is missing an organization name.");
+        return;
+      }
+      if (!/^\d{9}$/.test(ein)) {
+        showOrgBadge("error", `EIN for "${name}" must be exactly 9 digits (no dashes). Got: "${ein}"`);
+        return;
+      }
+      inputs[1].value = ein;  // normalize display to match what gets saved
+      orgs.push({ name, ein });
+    }
+
+    if (orgs.length === 0) {
+      showOrgBadge("error", "The list is empty — add at least one organization.");
+      return;
+    }
+
+    fetch("/save_orgs", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ orgs }),
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.error) {
+        showOrgBadge("error", data.error);
+      } else {
+        showOrgBadge("success", `Saved — ${data.count} organizations`);
+        // Exit edit mode and lock inputs
+        orgEditMode = true;
+        toggleOrgEdit();
+      }
+    })
+    .catch(() => showOrgBadge("error", "Could not save — check the server is running."));
+  }
+
+  function showOrgBadge(type, message) {
+    const badge = document.getElementById("org-save-badge");
+    badge.className = type;
+    badge.textContent = message;
+    badge.style.display = "block";
+    badge.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }
+</script>
+
+</body>
+</html>

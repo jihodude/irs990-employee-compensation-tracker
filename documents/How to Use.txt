@@ -1,0 +1,70 @@
+990 COMPENSATION PIPELINE
+Quick Start Guide
+==========================================
+
+WINDOWS — FIRST TIME ONLY
+
+  Step 1: Install Python (skip this if Python is already installed)
+
+    1. Go to: https://www.python.org/downloads/
+    2. Click the yellow button that says "Download Python Install Manager".
+    3. Run the downloaded file
+    4. If a terminal opens up, answer to accept all suggestions (y/n questions) -- Python will
+       install itself after. 
+
+  Step 2: Run setup
+
+    1. Double-click SETUP.bat
+    2. Wait for it to say "All good! Double-click START.bat to run the pipeline."
+    Only needs to be done once per computer.
+
+WINDOWS — RUNNING THE PIPELINE
+  1. Double-click START.bat
+  2. A browser window opens automatically
+  3. In the browser, click "Run Pipeline"
+  4. Wait 3-5 minutes while it downloads IRS data
+  5. Click "Download CSV" when it finishes
+
+MAC — FIRST TIME ONLY
+  Open the "For Mac" folder.
+  1. Double-click SETUP.command
+  2. Wait for it to say "Setup complete"
+
+MAC — RUNNING THE PIPELINE
+  Open the "For Mac" folder.
+  1. Double-click START.command
+  2. A browser window opens automatically
+  3. Follow the same steps as Windows above
+
+==========================================
+YOUR FILES
+
+  organizations.csv
+    The list of organizations and EINs the pipeline
+    searches for. Open in Excel to add, remove, or
+    update any entry. You can also edit this from
+    the web UI (click Edit in the Organizations panel).
+
+  outputs/
+    Your CSV results appear here after each run.
+    Also includes a run report (plain text) that
+    explains any orgs that were skipped and why.
+
+==========================================
+SETTINGS (in the browser)
+
+  IRS Index Year
+    "Most Recent (auto)" is recommended -- searches
+    the newest data first, falls back up to 3 years
+    for any org not yet found.
+
+  Minimum Compensation ($)
+    Set to 0 to include everyone.
+    Set higher (e.g. 100000) to filter to key staff only.
+
+==========================================
+SOMETHING NOT WORKING?
+
+  See the documents/ folder for:
+  - Windows Troubleshooting Guide.txt
+  - Mac Troubleshooting Guide.txt

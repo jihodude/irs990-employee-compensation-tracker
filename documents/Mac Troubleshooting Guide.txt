@@ -1,0 +1,101 @@
+============================================================
+  990 Pipeline — Mac Trouble Guide
+  Read this if START_PIPELINE_MAC.command is not working.
+============================================================
+
+
+PROBLEM 1: "macOS cannot verify the developer" or "app is damaged"
+------------------------------------------------------------
+This happens because the file was downloaded from the internet.
+macOS blocks it as a security precaution.
+
+FIX:
+  1. Open System Settings (or System Preferences on older Macs)
+  2. Go to Privacy & Security
+  3. Scroll down — you will see a message about this file being blocked
+  4. Click "Open Anyway"
+  5. Try double-clicking START_PIPELINE_MAC.command again
+
+ALTERNATE FIX (Terminal):
+  1. Open Terminal (search for it in Spotlight)
+  2. Type: xattr -cr  (with a space at the end — do NOT press Enter yet)
+  3. Drag the START_PIPELINE_MAC.command file into the Terminal window
+  4. Press Enter
+  5. Try double-clicking it again
+
+
+PROBLEM 2: "Permission denied" or nothing happens when double-clicking
+------------------------------------------------------------
+The file needs permission to run as a program.
+
+FIX:
+  1. Open Terminal (search for it in Spotlight)
+  2. Type: chmod +x  (with a space at the end — do NOT press Enter yet)
+  3. Drag the START_PIPELINE_MAC.command file into the Terminal window
+  4. Press Enter
+  5. Try double-clicking it again
+
+
+PROBLEM 3: "python3: command not found"
+------------------------------------------------------------
+Python is not installed on this Mac.
+
+FIX:
+  1. Open your browser and go to: https://www.python.org/downloads/
+  2. Click the big "Download Python" button
+  3. Open the downloaded file and follow the installer
+  4. Once installed, try the launcher again
+
+
+PROBLEM 4: "Port 5000 already in use" — browser shows error or wrong page
+------------------------------------------------------------
+On macOS 12 (Monterey) and later, Apple uses port 5000 for AirPlay.
+The pipeline detects this and automatically switches to port 5001.
+
+FIX:
+  If your browser opened to http://localhost:5000 and shows an error,
+  manually go to: http://localhost:5001
+
+
+PROBLEM 5: The browser didn't open automatically
+------------------------------------------------------------
+FIX:
+  Manually open your browser and go to: http://localhost:5000
+  (If that doesn't work, try: http://localhost:5001)
+
+
+PROBLEM 6: The pipeline runs for a very long time (5-10 minutes)
+------------------------------------------------------------
+This is NORMAL on the first run of a new year.
+The program downloads an 80 MB index file from the IRS (a list of all
+990 filings for that year). After the first run, subsequent runs are
+much faster because only the filings you request are downloaded.
+
+Do not close the window. Wait for the green "Done" message to appear.
+
+
+PROBLEM 7: "SSL Warning" or other yellow text in the terminal
+------------------------------------------------------------
+This is harmless. It is a known warning from an older security library
+on macOS. The pipeline works correctly despite this message.
+You can ignore it.
+
+
+PROBLEM 8: The output CSV is empty or has no rows
+------------------------------------------------------------
+Possible causes:
+  a) You set Minimum Compensation too high — try setting it to 0
+  b) An error occurred — check the Live Output panel on the screen
+     for any red [ERROR] messages
+
+
+PROBLEM 9: Where is my output file?
+------------------------------------------------------------
+The output file is saved here:
+  [990-pipeline folder] > user > outputs > compensation_output.csv
+
+You can also click the green "Download CSV" button that appears
+after a successful run.
+
+
+Still stuck? Contact whoever set this program up for you.

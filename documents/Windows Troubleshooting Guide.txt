@@ -1,0 +1,149 @@
+============================================================
+  990 Pipeline — Windows Trouble Guide
+  Read this if SETUP_WINDOWS.bat or START_PIPELINE_WINDOWS.bat
+  is not working.
+============================================================
+
+
+FIRST TIME SETUP? START HERE
+------------------------------------------------------------
+Before using START_PIPELINE_WINDOWS.bat, you must run setup once.
+Double-click SETUP_WINDOWS.bat and follow the on-screen instructions.
+If setup completed successfully, you will not need to run it again.
+
+
+PROBLEM 1: "Windows protected your PC" (blue/grey popup)
+------------------------------------------------------------
+Windows SmartScreen blocks files downloaded from the internet.
+This file is safe — it only runs Python.
+
+FIX:
+  1. Click "More info" (below the warning message)
+  2. Click "Run anyway"
+
+
+PROBLEM 2: The window flashes open and closes immediately
+------------------------------------------------------------
+An error occurred before the program could show you anything.
+
+FIX:
+  1. Right-click the .bat file
+  2. Choose "Run as administrator"
+  3. Try again
+
+  If it still closes: open the file in Notepad (right-click > Open with >
+  Notepad) to read what it does, then run it from Command Prompt to see
+  the error message.
+
+
+PROBLEM 3: "Python is not recognized" or "'py' is not recognized"
+------------------------------------------------------------
+Python is either not installed, or was installed without adding it
+to the system PATH.
+
+FIX:
+  Option A — Run SETUP_WINDOWS.bat. It will detect this and open the
+             Python download page for you automatically.
+
+  Option B — Install Python manually:
+    1. Go to: https://www.python.org/downloads/
+    2. Download and run the installer
+    3. IMPORTANT: On the FIRST screen of the installer, check the box
+       that says "Add Python to PATH" before clicking Install Now.
+    4. After install, restart your computer and try again.
+
+
+PROBLEM 4: "No module named 'flask'" or "No module named 'pandas'"
+------------------------------------------------------------
+The required libraries are not installed.
+
+FIX:
+  Run SETUP_WINDOWS.bat again. It installs all required libraries.
+
+
+PROBLEM 5: Browser shows "This site can't be reached" or "ERR_CONNECTION_REFUSED"
+------------------------------------------------------------
+This usually means the server hasn't finished starting yet.
+
+FIX:
+  Wait 5-10 seconds after the terminal window opens, then refresh
+  your browser. The server needs a moment to start up.
+
+  If it still doesn't work:
+  - Make sure the terminal window (black box) is still open and running
+  - Check it for any red error messages
+  - Try going to http://localhost:5001 instead
+
+
+PROBLEM 6: "Port 5000 is already in use" (message in the terminal)
+------------------------------------------------------------
+The pipeline is either already running in another window, or something
+else on your computer is using that port.
+
+FIX:
+  a) Check if another terminal window is already running the pipeline.
+     If yes, use that one or close it and try again.
+  b) The program will automatically try port 5001. Go to
+     http://localhost:5001 in your browser.
+
+
+PROBLEM 7: The pipeline runs for a very long time (5-10 minutes)
+------------------------------------------------------------
+This is NORMAL on the first run of a new year.
+The program downloads an 80 MB index file from the IRS (a list of all
+990 filings for that year). After the first run, subsequent runs are
+much faster because only the filings you request are downloaded.
+
+Do not close the window. Wait for the green "Done" message to appear
+in the browser.
+
+
+PROBLEM 8: "pip is not recognized"
+------------------------------------------------------------
+pip is Python's library installer. If it is missing, Python was
+installed incorrectly.
+
+FIX:
+  1. Uninstall Python from Control Panel > Add or Remove Programs
+  2. Re-install from https://www.python.org/downloads/
+  3. On the installer's first screen, CHECK "Add Python to PATH"
+  4. Run SETUP_WINDOWS.bat again
+
+
+PROBLEM 9: Setup fails with "Access is denied"
+------------------------------------------------------------
+The installer does not have permission to write files.
+
+FIX:
+  Right-click SETUP_WINDOWS.bat > "Run as administrator"
+  Try setup again.
+
+
+PROBLEM 10: My antivirus is flagging the .bat file
+------------------------------------------------------------
+Batch files (.bat) can trigger antivirus warnings because they run
+commands. This file only runs Python and installs standard libraries.
+
+FIX:
+  Add the 990-pipeline folder as an exception in your antivirus
+  software, or temporarily disable real-time protection while running
+  setup. Re-enable it after.
+
+
+PROBLEM 11: The browser didn't open automatically
+------------------------------------------------------------
+FIX:
+  Manually open your browser and go to: http://localhost:5000
+  (If that doesn't work, try: http://localhost:5001)
+
+
+PROBLEM 12: The output file is missing or I can't find it
+------------------------------------------------------------
+The output is saved here (inside the 990-pipeline folder):
+  user\outputs\compensation_output.csv
+
+You can also click the green "Download CSV" button that appears
+in the browser after a successful run.
+
+
+Still stuck? Contact whoever set this program up for you.
